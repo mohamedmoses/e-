@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/archive/b/b9/20250322225646%21Etisalat_eand_Logo_EN.svg">
+<title>Quick Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --card: #334155;
+  --text: #e5e7eb;
+
+  --elife: #38bdf8;
+  --postpaid: #22c55e;
+  --prepaid: #facc15;
+  --others: #a78bfa;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  background-size: 400% 400%;
+  animation: bgMove 25s ease infinite;
+}
+
+@keyframes bgMove {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* SIGNATURE FONT */
+.signature-text {
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.6px;
+  color: #e4e4e4;
+  font-weight: 600;
+}
+
+.signature-name {
+  font-family: "Poppins", system-ui, sans-serif;
+  color: #ffe600;        /* 🔴 red */
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+
+/* STOPWATCH */
+.stopwatch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 22px;          /* ⬆ bigger */
+  color: #e4e4e4;
+}
+
+.stopwatch span {
+  min-width: 72px;          /* ⬆ clearer */
+  font-weight: 600;
+}
+
+.stopwatch span {
+  min-width: 60px;
+  text-align: center;
+}
+
+.stopwatch button {
+  background: var(--card);
+  border: none;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.stopwatch button:hover {
+  background: #475569;
+}
+
+/* DATE */
+.today-date {
+  font-size: 16px;
+  color: #e4e4e4;           /* 🔴 red */
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ===== TOP DIVIDER LINE ===== */
+.top-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #ffffff,
+    transparent
+  );
+  margin-bottom: 14px;
+  opacity: 0.6;
+}
+
+/* SECTION TITLES */
+.section-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 22px 0 12px;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 2px;
+  background: #64748b;
+  margin: 6px auto 0;
+}
+
+/* TOOLS */
+.tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.tool {
+  font-family: "Poppins", system-ui, sans-serif;
+  position: relative;
+  display: flex;
+  align-items: center;          /* vertical center */
+  justify-content: center;      /* horizontal center */
+  background: var(--card);
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 600;      /* 🔥 BOLD */
+  text-decoration: none;
+  color: var(--text);
+}
+
+.tool:hover {
+  background: #38bdf8;
+  color: #000;
+}
+
+/* SHORTCUT BADGE */
+.shortcut {
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #000;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: none;
+}
+.show-shortcuts .shortcut {
+  display: block;
+}
+
+/* MAIN TOPICS */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.column {
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+/* MAIN TOPIC HEADER */
+.column-header {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 8px 0;
+  margin-bottom: 12px;
+  border-bottom: 2px solid;
+}
+
+/* ===== PRORATED CALCULATOR ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.overlay.active {
+  display: flex;
+}
+
+/* ===== CALCULATOR OPEN ANIMATION ===== */
+@keyframes calcEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.calculator {
+  background: #1f2937;
+  border-radius: 16px;
+  padding: 16px;
+  width: 100%;
+  max-width: 420px;
+  border: 2px solid #fb7185;
+  /* 🔥 animation */
+  animation: calcEnter 0.25s ease-out;
+}
+
+.calculator h3 {
+  text-align: center;
+  margin-bottom: 5px;
+  padding: 2px;
+  color: #da0c0c;
+  letter-spacing: 1px;
+}
+
+.calc-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.calc-row label {
+  font-size: 13px;
+  align-self: center;
+}
+
+.calc-row input {
+  background: var(--card);
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.calc-result {
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  background: #020617;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #da0c0c;
+}
+
+/* PRORATED CALCULATOR TOOL STYLE */
+.prorated-tool {
+  background: #7f1d1d;          /* dark red */
+  border: 1px solid #fb7185;    /* soft red accent */
+  cursor: pointer;              /* hand cursor */
+}
+
+.prorated-tool:hover {
+  background: #7f1d1d;          /* brighter red on hover */
+  color: #000;
+}
+/* 🔥 TWO-COLUMN SUBTOPICS */
+.subtopics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.subtopic {
+  display: block;
+  background: var(--card);
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text);
+}
+
+/* ===== NOTES TOOL ===== */
+.notes-tool {
+  background: #0f766e;          /* teal */
+  border: 1px solid #2dd4bf;
+  cursor: pointer;
+}
+
+.notes-tool:hover {
+  background: #2dd4bf;
+  color: #000;
+}
+
+/* ===== VAT TOOL ===== */
+.vat-tool {
+  background: #1e3a8a;        /* blue */
+  border: 1px solid #60a5fa;
+  cursor: pointer;
+}
+
+.vat-tool:hover {
+  background: #60a5fa;
+  color: #000;
+}
+
+/* VAT modal accent */
+.vat-calculator {
+  border-color: #60a5fa;
+}
+
+.vat-calculator h3 {
+  color: #60a5fa;
+}
+
+/* ===== NOTES MODAL ===== */
+.notes-card {
+  background: #0f172a;
+  border-radius: 16px;
+  padding: 16px;
+  width: 100%;
+  max-width: 500px;
+  border: 2px solid #2dd4bf;
+  animation: calcEnter 0.25s ease-out;
+}
+
+.notes-card h3 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #2dd4bf;
+  letter-spacing: 1px;
+}
+
+.notes-card textarea {
+  width: 100%;
+  height: 220px;
+  resize: none;
+  background: var(--card);
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+.notes-card textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* COLORS */
+.elife .column-header { color: var(--elife); border-color: var(--elife); }
+.elife .subtopic:hover { background: var(--elife); color: #000; }
+
+.postpaid .column-header { color: var(--postpaid); border-color: var(--postpaid); }
+.postpaid .subtopic:hover { background: var(--postpaid); color: #000; }
+
+.prepaid .column-header { color: var(--prepaid); border-color: var(--prepaid); }
+.prepaid .subtopic:hover { background: var(--prepaid); color: #000; }
+
+.others .column-header { color: var(--others); border-color: var(--others); }
+.others .subtopic:hover { background: var(--others); color: #000; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .columns { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 500px) {
+  .columns { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">
+  <div class="stopwatch">
+    <span id="time">00:00:00</span>
+    <button onclick="startWatch()">▶</button>
+    <button onclick="stopWatch()">⏹</button>
+    <button onclick="resetWatch()">↺</button>
+  </div>
+
+  <!-- THIS CLASS NAME MUST MATCH -->
+  <div class="signature-text" id="signature">
+    Created by <span class="signature-name">@Islam Mohamed Mousa</span>
+  </div>
+
+  <div class="today-date" id="todayDate"></div>
+</div>
+
+<div class="top-divider"></div>
+
+<!-- IMPORTANT TOOLS -->
+<div class="tools">
+  <a href="eslam-moses.vercel.app" target="_blank" class="tool" data-key="0"><span class="shortcut">0</span>InfoHub</a>
+  <a href="https://upload.wikimedia.org/wikipedia/commons/archive/b/b9/20250322225646%21Etisalat_eand_Logo_EN.svg" target="_blank" class="tool" data-key="1" id="tool-cia"><span class="shortcut">1</span>CIA</a>
+  <a href="eslam-moses.vercel.app" target="_blank" class="tool" data-key="2" id="tool-cia"><span class="shortcut">2</span>Device Care</a>
+  <a href="https://chat.deepseek.com/a/chat/s/87b52dff-995a-4d51-a271-87ec5c3dc344" target="_blank" class="tool" data-key="3" id="tool-sla"><span class="shortcut">3</span>SLA</a>
+  <a href="https://translate.google.com.eg/?hl=ar" target="_blank" class="tool" data-key="4" id="tool-payg"><span class="shortcut">4/span>6</span>PAYG</a>
+  <a href="https://translate.google.com.eg/?hl=ar" target="_blank" class="tool" data-key="5" id="tool-payg"><span class="shortcut">5</span>Verification</a>
+  <a href="#" target="_blank" class="tool" data-key="6"><span class="shortcut">6</span>Waiver Generator</a>
+  <a href="#" target="_blank" class="tool" data-key="7"><span class="shortcut">7</span>Message Board</a>
+  <div class="tool prorated-tool" onclick="openCalc()">
+    <span class="shortcut">7</span>Prorated Calculator
+  </div>
+
+  <div class="tool vat-tool" onclick="openVAT()">
+    <span class="shortcut">8</span>VAT Calculator
+  </div>
+
+  <div class="tool notes-tool" onclick="openNotes()">
+    <span class="shortcut">9</span>Notes
+  </div>
+</div>
+<!-- PRORATED CALCULATOR MODAL -->
+<div class="overlay" id="overlay" onclick="closeCalc()">
+  <div class="calculator" onclick="event.stopPropagation()">
+    <div class="calc-row">
+      <label>Plan / Price</label>
+      <input type="number" id="price">
+    </div>
+
+    <div class="calc-row">
+      <label>Start Date</label>
+      <input type="date" id="startDate">
+    </div>
+
+    <div class="calc-row">
+      <label>Days in Month</label>
+      <input type="number" id="daysInMonth" readonly>
+    </div>
+
+    <div class="calc-row">
+      <label>Remaining Days</label>
+      <input type="number" id="remainingDays" readonly>
+    </div>
+
+    <div class="calc-result" id="result">—</div>
+  </div>
+</div>
+
+<!-- VAT CALCULATOR MODAL -->
+<div class="overlay" id="vatOverlay" onclick="closeVAT()">
+  <div class="calculator vat-calculator" onclick="event.stopPropagation()">
+    <div class="calc-row">
+      <label>Price without VAT</label>
+      <input type="number" id="priceWithoutVAT">
+    </div>
+
+    <div class="calc-row">
+      <label>Price with VAT</label>
+      <input type="number" id="priceWithVAT">
+    </div>
+  </div>
+</div>
+
+<!-- NOTES MODAL -->
+<div class="overlay" id="notesOverlay" onclick="closeNotes()">
+  <div class="notes-card" onclick="event.stopPropagation()">
+    <textarea
+      id="notesText"
+      placeholder="Write your notes here..."
+    ></textarea>
+  </div>
+</div>
+
+<!-- MAIN TOPICS -->
+<div class="columns">
+
+  <div class="column elife">
+    <div class="column-header">eLife</div>
+    <div class="subtopics-grid">
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+    </div>
+  </div>
+
+  <div class="column postpaid">
+    <div class="column-header">Postpaid</div>
+    <div class="subtopics-grid">
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+    </div>
+  </div>
+
+  <div class="column prepaid">
+    <div class="column-header">Prepaid</div>
+    <div class="subtopics-grid">
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+    </div>
+  </div>
+
+  <div class="column others">
+    <div class="column-header">Others</div>
+    <div class="subtopics-grid">
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+      <a href="#" target="_blank" class="subtopic">Plans</a>
+      <a href="#" target="_blank" class="subtopic">Installation</a>
+      <a href="#" target="_blank" class="subtopic">Technical Issues</a>
+      <a href="#" target="_blank" class="subtopic">Cancellation</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   SHORTCUT SYSTEM
+========================================================= */
+const body = document.body;
+const tools = document.querySelectorAll(".tool[data-key]");
+
+document.addEventListener("keydown", e => {
+
+  /* Show shortcut numbers when Alt is pressed */
+  if (e.key === "Alt") {
+    body.classList.add("show-shortcuts");
+    return;
+  }
+
+  if (!body.classList.contains("show-shortcuts")) return;
+
+  /* ALT + 7 → Prorated Calculator */
+  if (e.key === "7") {
+    openCalc();
+    body.classList.remove("show-shortcuts");
+    return;
+  }
+
+  /* ALT + 8 → Prorated Calculator */
+  if (e.key === "8") {
+    openVAT();
+    body.classList.remove("show-shortcuts");
+    return;
+  }
+
+  /* ALT + 9 → Notes */
+  if (e.key === "9") {
+    openNotes();
+    body.classList.remove("show-shortcuts");
+    return;
+  }
+
+  /* ALT + 1–7 → Normal tools */
+  tools.forEach(tool => {
+    if (e.key === tool.dataset.key) {
+      window.open(tool.href, "_blank");
+      body.classList.remove("show-shortcuts");
+    }
+  });
+});
+
+document.addEventListener("keyup", e => {
+  if (e.key === "Alt") {
+    body.classList.remove("show-shortcuts");
+  }
+});
+
+/* =========================================================
+   PRORATED CALCULATOR
+========================================================= */
+function openCalc() {
+  document.getElementById("overlay").classList.add("active");
+
+  // Auto-focus and select Plan / Price
+  setTimeout(() => {
+    const priceInput = document.getElementById("price");
+    priceInput.focus();
+    priceInput.select(); // 🔥 select previous value
+  }, 50);
+}
+
+function closeCalc() {
+  document.getElementById("overlay").classList.remove("active");
+}
+
+function updateProration() {
+  const price = parseFloat(document.getElementById("price").value) || 0;
+  const dateVal = document.getElementById("startDate").value;
+  if (!dateVal) return;
+
+  const d = new Date(dateVal);
+  const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const remaining = daysInMonth - d.getDate() + 1;
+
+  document.getElementById("daysInMonth").value = daysInMonth;
+  document.getElementById("remainingDays").value = remaining;
+
+  document.getElementById("result").textContent =
+    price ? ((price / daysInMonth) * remaining).toFixed(2) : "—";
+}
+
+/* Default date = today */
+document.getElementById("startDate").value =
+  new Date().toISOString().split("T")[0];
+
+document.getElementById("price").addEventListener("input", updateProration);
+document.getElementById("startDate").addEventListener("change", updateProration);
+updateProration();
+
+
+/* =========================================================
+   NOTES
+========================================================= */
+function openNotes() {
+  document.getElementById("notesOverlay").classList.add("active");
+  document.getElementById("notesText").focus();
+}
+
+function closeNotes() {
+  document.getElementById("notesOverlay").classList.remove("active");
+}
+
+/* Auto-save notes */
+const notesArea = document.getElementById("notesText");
+if (notesArea) {
+  notesArea.value = localStorage.getItem("quickNotes") || "";
+
+  notesArea.addEventListener("input", () => {
+    localStorage.setItem("quickNotes", notesArea.value);
+  });
+}
+
+
+/* =========================================================
+   DATE (TOP RIGHT)
+========================================================= */
+const dateEl = document.getElementById("todayDate");
+if (dateEl) {
+  const today = new Date();
+  dateEl.textContent = today.toLocaleDateString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+/* =========================================================
+   VAT CALCULATOR (5%)
+========================================================= */
+const VAT_RATE = 0.05;
+let vatLock = false;
+
+function openVAT() {
+  document.getElementById("vatOverlay").classList.add("active");
+
+  // Auto-focus & select first input
+  setTimeout(() => {
+    const input = document.getElementById("priceWithoutVAT");
+    input.focus();
+    input.select();
+  }, 50);
+}
+
+function closeVAT() {
+  document.getElementById("vatOverlay").classList.remove("active");
+}
+
+/* Two-way calculation (safe) */
+const withoutVAT = document.getElementById("priceWithoutVAT");
+const withVAT = document.getElementById("priceWithVAT");
+
+withoutVAT.addEventListener("input", () => {
+  if (vatLock) return;
+  vatLock = true;
+
+  const value = parseFloat(withoutVAT.value);
+  withVAT.value = value
+    ? (value * (1 + VAT_RATE)).toFixed(2)
+    : "";
+
+  vatLock = false;
+});
+
+withVAT.addEventListener("input", () => {
+  if (vatLock) return;
+  vatLock = true;
+
+  const value = parseFloat(withVAT.value);
+  withoutVAT.value = value
+    ? (value / (1 + VAT_RATE)).toFixed(2)
+    : "";
+
+  vatLock = false;
+});
+
+/* Auto-select on focus (Excel-like behavior) */
+[withoutVAT, withVAT].forEach(input => {
+  input.addEventListener("focus", function () {
+    this.select();
+  });
+});
+
+/* =========================================================
+   STOPWATCH
+========================================================= */
+let seconds = 0;
+let timer = null;
+
+function updateTime() {
+  seconds++;
+  const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+  const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+  const s = String(seconds % 60).padStart(2, "0");
+  document.getElementById("time").textContent = `${h}:${m}:${s}`;
+}
+
+function startWatch() {
+  if (!timer) timer = setInterval(updateTime, 1000);
+}
+
+function stopWatch() {
+  clearInterval(timer);
+  timer = null;
+}
+
+function resetWatch() {
+  stopWatch();
+  seconds = 0;
+  document.getElementById("time").textContent = "00:00:00";
+}
+</script>
+
+</body>
+</html>
